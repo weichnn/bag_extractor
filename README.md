@@ -11,7 +11,7 @@ catkin_ws
 	cd ~/catkin_ws/
 	catkin_make
 	cd src
-	git clone 
+	git clone git@github.com:weichnn/bag_extractor.git
 	
 ```
 
