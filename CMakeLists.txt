@@ -55,6 +55,12 @@ include_directories(
 
 ## Declare a C++ executable
 
+add_executable(msdi_rl_data src/rgbLWIR.cpp)
+target_link_libraries(msdi_rl_data
+    ${OpenCV_LIBS}
+    ${catkin_LIBRARIES})
+
+
 add_executable(msdi_rld_data src/rgbLWIRDepth.cpp)
 target_link_libraries(msdi_rld_data
     ${OpenCV_LIBS}

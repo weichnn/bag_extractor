@@ -1,3 +1,25 @@
+/**
+ * This file is part of DSO.
+ *
+ * Copyright 2016 Technical University of Munich and Intel.
+ * Developed by Jakob Engel <engelj at in dot tum dot de>,
+ * for more information see <http://vision.in.tum.de/dso>.
+ * If you use this code, please cite the respective publications as
+ * listed on the above website.
+ *
+ * DSO is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * DSO is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with DSO. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include <geometry_msgs/PoseStamped.h>
 #include <image_transport/image_transport.h>
@@ -20,23 +42,75 @@
 #include <tuple>
 
 #include "cv_bridge/cv_bridge.h"
+#include "dso_ros/Flag.h"
 #include "geometry_msgs/Pose.h"
 #include "math.h"
-#include "msdi_ros/Flag.h"
 
+#define M_PI 3.14159265358979323846
+
+std::string calib = "";
+std::string vignetteFile = "";
+std::string gammaFile = "";
+std::string right_calib = "";
+std::string right_vignetteFile = "";
+std::string right_gammaFile = "";
+// std::string s = "";
 std::string out_root = "./data";
+//	left grey, left rgb, right optris, kinect rgb, kinect depth
 std::tuple<std::string, std::string, std::string, std::string, std::string>
     outPaths;
 
 bool useSampleOutput = false;
 int flag_state_now = 0;
-double offsetOptrisRGB = 0.0;
+double offsetOptrisRGB = 0.06;
 
 image_transport::Publisher mImg_pub;
 
 void parseArgument(char *arg) {
   int option;
   char buf[1000];
+
+  if (1 == sscanf(arg, "sampleoutput=%d", &option)) {
+    if (option == 1) {
+      useSampleOutput = true;
+      printf("USING SAMPLE OUTPUT WRAPPER!\n");
+    }
+    return;
+  }
+
+  if (1 == sscanf(arg, "calib=%s", buf)) {
+    calib = buf;
+    printf("loading calibration from %s!\n", calib.c_str());
+    return;
+  }
+  if (1 == sscanf(arg, "vignette=%s", buf)) {
+    vignetteFile = buf;
+    printf("loading vignette from %s!\n", vignetteFile.c_str());
+    return;
+  }
+
+  if (1 == sscanf(arg, "gamma=%s", buf)) {
+    gammaFile = buf;
+    printf("loading gammaCalib from %s!\n", gammaFile.c_str());
+    return;
+  }
+
+  if (1 == sscanf(arg, "right_calib=%s", buf)) {
+    right_calib = buf;
+    printf("loading calibration from %s!\n", right_calib.c_str());
+    return;
+  }
+  if (1 == sscanf(arg, "right_vignette=%s", buf)) {
+    right_vignetteFile = buf;
+    printf("loading vignette from %s!\n", right_vignetteFile.c_str());
+    return;
+  }
+
+  if (1 == sscanf(arg, "right_gamma=%s", buf)) {
+    right_gammaFile = buf;
+    printf("loading gammaCalib from %s!\n", right_gammaFile.c_str());
+    return;
+  }
 
   if (1 == sscanf(arg, "out_root=%s", buf)) {
     out_root = buf;
@@ -58,8 +132,14 @@ bool IsFileExist(const std::string &path) {
   }
 }
 void CreateFolder(const std::string &path) {
+  //   if (IsFileExist(path)) {
+  //     std::cout << path << "is already exist";
+  //     return;
+  //   }
   const std::string path_make = "mkdir -p " + path;
   const int err = system(path_make.c_str());
+  //   const int err = mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH |
+  //   S_IXOTH);
   if (err == -1) {
     std::cout << "can't create " << path;
   }
@@ -67,75 +147,129 @@ void CreateFolder(const std::string &path) {
 
 int frameID = 0;
 
-cv::Mat im_rotate_crop(const cv::Mat &img, const cv::Rect &rect) {
-  cv::Point2f src_center(img.cols / 2.0F, img.rows / 2.0F);
-  cv::Mat rot_mat = getRotationMatrix2D(src_center, 180, 1.0);
-  cv::Mat dst;
-  cv::warpAffine(img, dst, rot_mat, img.size());
-
-  cv::Mat ROI(dst, rect);
-  cv::Mat croppedImage;
-  ROI.copyTo(croppedImage);
-
-  return croppedImage;
-}
-cv::Mat im_crop(const cv::Mat &img, const cv::Rect &rect) {
-  cv::Mat ROI(img, rect);
-  cv::Mat croppedImage;
-  ROI.copyTo(croppedImage);
-
-  return croppedImage;
-}
-
 void monoVidCb(const sensor_msgs::ImageConstPtr img) {
   sensor_msgs::Image copiedImg = *img;
   copiedImg.header.stamp = img->header.stamp + ros::Duration(offsetOptrisRGB);
   mImg_pub.publish(copiedImg);
 }
 
-void flagCb(const msdi_ros::Flag flag) {
+void flagCb(const dso_ros::Flag flag) {
   flag_state_now = flag.flag_state;
   printf("%d\n", flag.flag_state);
 }
 
-//	without kinect rgb
-void mssensorCb(const sensor_msgs::ImageConstPtr img,
-                const sensor_msgs::ImageConstPtr imgRight,
-                const sensor_msgs::ImageConstPtr imgKinectDepth) {
+void llh2xyz(double llh[3], double xyz[3])  //Î³¾­¸ß ×ª µØÐÄµØÇò×ø±êÏµ
+{
+  double phi = llh[0] * M_PI / 180.0f;
+  double lambda = llh[1] * M_PI / 180.0f;
+  double h = llh[2];
+
+  double a = 6378137.0000f;  // earth semimajor axis in meters
+  double b = 6356752.3142f;  // earth semiminor axis in meters
+  double e = sqrt(1.0f - (b / a) * (b / a));
+
+  double sinphi = sin(phi);
+  double cosphi = cos(phi);
+  double coslam = cos(lambda);
+  double sinlam = sin(lambda);
+  double tan2phi = (tan(phi)) * (tan(phi));
+  double tmp = 1.0f - e * e;
+  double tmpden = sqrt(1.0f + tmp * tan2phi);
+
+  double x = (a * coslam) / tmpden + h * coslam * cosphi;
+
+  double y = (a * sinlam) / tmpden + h * sinlam * cosphi;
+
+  double tmp2 = sqrt(1.0f - e * e * sinphi * sinphi);
+  double z = (a * tmp * sinphi) / tmp2 + h * sinphi;
+
+  xyz[0] = x;
+  xyz[1] = y;
+  xyz[2] = z;
+}
+
+void xyz2enu(double xyz[3], double orgllh[3],
+             double enu[3])  //µØÐÄµØÇò×ø±êÏµ ×ª ¶«±±ÌìµØÀí×ø±êÏµ
+{
+  double tmpxyz[3];
+  double tmporg[3];
+  double difxyz[3];
+  // double orgllh[3];
+  double orgxyz[3];
+  double phi, lam, sinphi, cosphi, sinlam, coslam;
+
+  llh2xyz(orgllh, orgxyz);
+
+  int i;
+  for (i = 0; i < 3; i++) {
+    tmpxyz[i] = xyz[i];
+    tmporg[i] = orgxyz[i];
+    difxyz[i] = tmpxyz[i] - tmporg[i];
+  }
+
+  // xyz2llh(orgxyz,orgllh);
+
+  phi = orgllh[0] * M_PI / 180.0f;
+  lam = orgllh[1] * M_PI / 180.0f;
+  sinphi = sin(phi);
+  cosphi = cos(phi);
+  sinlam = sin(lam);
+  coslam = cos(lam);
+  double R[3][3] = {{-sinlam, coslam, 0.0f},
+                    {-sinphi * coslam, -sinphi * sinlam, cosphi},
+                    {cosphi * coslam, cosphi * sinlam, sinphi}};
+
+  enu[0] = 0;
+  enu[1] = 0;
+  enu[2] = 0;
+  for (i = 0; i < 3; i++) {
+    enu[0] = enu[0] + R[0][i] * difxyz[i];
+    enu[1] = enu[1] + R[1][i] * difxyz[i];
+    enu[2] = enu[2] + R[2][i] * difxyz[i];
+  }
+}
+
+void gtCb(const sensor_msgs::NavSatFix nvdata) {
+  FILE *f;
+  char buf3[1000];
+  snprintf(buf3, 1000, "%s/gt.txt", out_root.c_str());
+  f = fopen(buf3, "a");
+
+  double orgllh[3] = {(30.263254f), (120.115654f), 33.196903};
+  double llh[3] = {(nvdata.latitude), (nvdata.longitude), nvdata.altitude};
+  double xyz[3];
+  llh2xyz(llh, xyz);
+  double enu[3];
+  llh2xyz(llh, xyz);
+  xyz2enu(xyz, orgllh, enu);
+  fprintf(f, "%lf %lf %lf %lf\n", nvdata.header.stamp.toSec(), enu[0], enu[1],
+          enu[2]);
+  fclose(f);
+}
+
+void vidCb(const sensor_msgs::ImageConstPtr img,
+           const sensor_msgs::ImageConstPtr imgRight) {
   //	color
   cv_bridge::CvImagePtr cv_ptr =
       cv_bridge::toCvCopy(img, sensor_msgs::image_encodings::BGR8);
   assert(cv_ptr->image.type() == CV_8UC3);
   assert(cv_ptr->image.channels() == 3);
 
-  //	optris
   cv_bridge::CvImagePtr right_cv_ptr =
       cv_bridge::toCvCopy(imgRight, sensor_msgs::image_encodings::MONO16);
   assert(right_cv_ptr->image.type() == CV_16U);
   assert(right_cv_ptr->image.channels() == 1);
 
-  //	kinect
-  cv::Rect rect(160, 30, 640, 480);
-
-  cv_bridge::CvImagePtr kinect_depth_cv_ptr = cv_bridge::toCvCopy(
-      imgKinectDepth, sensor_msgs::image_encodings::TYPE_16UC1);
-  assert(kinect_depth_cv_ptr->image.type() == CV_16UC1);
-  assert(kinect_depth_cv_ptr->image.channels() == 1);
-  // kinect_depth_cv_ptr->image = im_rotate_crop(kinect_depth_cv_ptr->image,
-  // rect);
-
-  //	process optris
   cv::Mat m;
   cv::Mat v;
   cv::meanStdDev(right_cv_ptr->image, m, v);
   double maxinm;
   double mininm;
   cv::minMaxIdx(right_cv_ptr->image, &maxinm, &mininm);
-  std::cout << "optris mean, std, max, min" << m << "\t" << v << "\t" << maxinm
-            << "\t" << mininm << std::endl;
+  std::cout << m << "\t" << v << "\t" << maxinm << "\t" << mininm << std::endl;
 
-  // cv::Mat min = m - 3.0f * v;
-  // cv::Mat max = m + 3.0f * v;
+  // cv::Mat min = m-3.0f*v;
+  // cv::Mat max = m+3.0f*v;
 
   double min = mininm;
   double max = maxinm;
@@ -144,8 +278,7 @@ void mssensorCb(const sensor_msgs::ImageConstPtr img,
 
   for (int i = 0; i < (right_cv_ptr->image).rows; ++i) {
     for (int j = 0; j < (right_cv_ptr->image).cols; ++j) {
-      double x =
-          (double)(right_cv_ptr->image.at<ushort>(i, j)) - min;
+      double x = (double)(right_cv_ptr->image.at<ushort>(i, j)) - min;
       if (x < 0.0f) {
         right_cv_ptr->image.at<ushort>(i, j) = 0;
       } else {
@@ -158,7 +291,6 @@ void mssensorCb(const sensor_msgs::ImageConstPtr img,
       }
     }
   }
-
   double time = cv_ptr->header.stamp.toSec();
   double right_time = right_cv_ptr->header.stamp.toSec();
   right_cv_ptr->image.convertTo(right_cv_ptr->image, CV_8U);
@@ -182,11 +314,6 @@ void mssensorCb(const sensor_msgs::ImageConstPtr img,
   snprintf(bufoptris, 1000, "%s/%lf.png", std::get<2>(outPaths).c_str(),
            cv_ptr->header.stamp.toSec());
   imwrite(bufoptris, right_cv_ptr->image);
-
-  char bufkd[1000];
-  snprintf(bufkd, 1000, "%s/%lf.png", std::get<4>(outPaths).c_str(),
-           cv_ptr->header.stamp.toSec());
-  imwrite(bufkd, kinect_depth_cv_ptr->image);
 
   FILE *f;
   char buf3[1000];
@@ -257,7 +384,7 @@ void chatterCallback3(const geometry_msgs::PoseStamped &msg) {
 }
 
 int main(int argc, char **argv) {
-  ros::init(argc, argv, "msdi_ros_live");
+  ros::init(argc, argv, "dso_live");
 
   for (int i = 1; i < argc; i++) parseArgument(argv[i]);
 
@@ -289,11 +416,13 @@ int main(int argc, char **argv) {
             << std::endl;
 
   ros::Subscriber flagStateSub = nh.subscribe("/optris/flag_state", 1, &flagCb);
+  ros::Subscriber gtSub = nh.subscribe("/fix", 1, &gtCb);
   ros::Subscriber imgSub = nh.subscribe(imagetopic_L, 1, &monoVidCb);
   image_transport::ImageTransport it(nh);
   mImg_pub = it.advertise("/camera/image_raw2", 1);
   ros::Subscriber poseSub = nh.subscribe(poseTopic1, 10, &chatterCallback);
   ros::Subscriber poseSub2 = nh.subscribe(poseTopic2, 10, &chatterCallback2);
+
   message_filters::Subscriber<sensor_msgs::Image> left_sub(
       nh, "/camera/image_raw2", 10);
   message_filters::Subscriber<sensor_msgs::Image> right_sub(nh, imagetopic_R,
@@ -302,13 +431,13 @@ int main(int argc, char **argv) {
       nh, imagetopic_kinectRGB, 10);
   message_filters::Subscriber<sensor_msgs::Image> kinect_depth_sub(
       nh, imagetopic_kinectD, 10);
+  typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image,
+                                                          sensor_msgs::Image>
+      sync_pol;
 
-  typedef message_filters::sync_policies::ApproximateTime<
-      sensor_msgs::Image, sensor_msgs::Image, sensor_msgs::Image>
-      sync_pol3;
-  message_filters::Synchronizer<sync_pol3> sync3(sync_pol3(10), left_sub,
-                                                 right_sub, kinect_depth_sub);
-  sync3.registerCallback(boost::bind(&mssensorCb, _1, _2, _3));
+  message_filters::Synchronizer<sync_pol> sync(sync_pol(10), left_sub,
+                                               right_sub);
+  sync.registerCallback(boost::bind(&vidCb, _1, _2));
 
   ros::spin();
 

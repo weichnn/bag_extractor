@@ -1,0 +1,20 @@
+<launch>
+
+    <!-- Set output root dir(Absolute path) here! -->
+  <arg name="out_root" default="$(find msdi_ros)/data/"/>
+
+  <node name="msdi_rl_data" pkg="msdi_ros" type="msdi_rl_data" 
+		args="out_root=$(arg out_root)" output="screen">
+    <!-- Set camera topics here! -->  
+    <param name="imagetopic_l"      type="string" value="/camera/image_raw"/>
+    <param name="imagetopic_r"      type="string" value="/optris/thermal_image"/>
+    <param name="imagetopic_krgb"      type="string" value="/kinect2/qhd/image_color_rect"/>
+    <param name="imagetopic_d"      type="string" value="/kinect2/qhd/image_depth_rect"/>
+    <param name="poseTopic1"      type="string" value="/vrpn_client_node/RigidBody/pose"/>
+    <param name="poseTopic2"      type="string" value="/vrpn_client_node/RigidBody/pose2"/>
+    <param name="offset"      type="double" value="0.00"/>
+  </node>
+  
+
+ 
+</launch>
