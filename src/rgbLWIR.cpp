@@ -1,25 +1,3 @@
-/**
- * This file is part of DSO.
- *
- * Copyright 2016 Technical University of Munich and Intel.
- * Developed by Jakob Engel <engelj at in dot tum dot de>,
- * for more information see <http://vision.in.tum.de/dso>.
- * If you use this code, please cite the respective publications as
- * listed on the above website.
- *
- * DSO is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * DSO is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with DSO. If not, see <http://www.gnu.org/licenses/>.
- */
 
 #include <geometry_msgs/PoseStamped.h>
 #include <image_transport/image_transport.h>
@@ -30,9 +8,9 @@
 #include <ros/ros.h>
 #include <sensor_msgs/CameraInfo.h>
 #include <sensor_msgs/Image.h>
+#include <sensor_msgs/Imu.h>
 #include <sensor_msgs/NavSatFix.h>
 #include <sensor_msgs/image_encodings.h>
-#include <sensor_msgs/Imu.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -351,12 +329,12 @@ void imuCb(const sensor_msgs::Imu &msg) {
   snprintf(buf, 1000, "%s/imu.txt", out_root.c_str());
   fab = fopen(buf, "a");
 
-  fprintf(fab, "%lf, %lf, %lf, %lf, %lf, %lf, %lf\n", time, msg.angular_velocity.x,
-          msg.angular_velocity.y, msg.angular_velocity.z, msg.linear_acceleration.x,
+  fprintf(fab, "%lf, %lf, %lf, %lf, %lf, %lf, %lf\n", time,
+          msg.angular_velocity.x, msg.angular_velocity.y,
+          msg.angular_velocity.z, msg.linear_acceleration.x,
           msg.linear_acceleration.y, msg.linear_acceleration.z);
   fclose(fab);
 }
-
 
 int main(int argc, char **argv) {
   ros::init(argc, argv, "dso_live");
