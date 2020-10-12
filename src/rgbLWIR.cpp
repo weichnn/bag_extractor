@@ -49,13 +49,6 @@
 
 #define M_PI 3.14159265358979323846
 
-std::string calib = "";
-std::string vignetteFile = "";
-std::string gammaFile = "";
-std::string right_calib = "";
-std::string right_vignetteFile = "";
-std::string right_gammaFile = "";
-// std::string s = "";
 std::string out_root = "./data";
 //	left grey, left rgb, right optris, kinect rgb, kinect depth
 std::tuple<std::string, std::string, std::string, std::string, std::string>
@@ -63,7 +56,7 @@ std::tuple<std::string, std::string, std::string, std::string, std::string>
 
 bool useSampleOutput = false;
 int flag_state_now = 0;
-double offsetOptrisRGB = 0.06;
+double offsetOptrisRGB = 0.0;
 
 image_transport::Publisher mImg_pub;
 
