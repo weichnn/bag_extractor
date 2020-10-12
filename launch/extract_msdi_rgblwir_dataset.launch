@@ -10,6 +10,7 @@
     <param name="imagetopic_r"      type="string" value="/optris/thermal_image"/>
     <param name="imagetopic_krgb"      type="string" value="/kinect2/qhd/image_color_rect"/>
     <param name="imagetopic_d"      type="string" value="/kinect2/qhd/image_depth_rect"/>
+    <param name="imuTopic"      type="string" value="/imu/data"/>
     <param name="poseTopic1"      type="string" value="/vrpn_client_node/RigidBody/pose"/>
     <param name="poseTopic2"      type="string" value="/vrpn_client_node/RigidBody/pose2"/>
     <param name="offset"      type="double" value="0.00"/>

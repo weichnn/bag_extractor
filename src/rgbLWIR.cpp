@@ -32,6 +32,7 @@
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/NavSatFix.h>
 #include <sensor_msgs/image_encodings.h>
+#include <sensor_msgs/Imu.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -75,40 +76,6 @@ void parseArgument(char *arg) {
       useSampleOutput = true;
       printf("USING SAMPLE OUTPUT WRAPPER!\n");
     }
-    return;
-  }
-
-  if (1 == sscanf(arg, "calib=%s", buf)) {
-    calib = buf;
-    printf("loading calibration from %s!\n", calib.c_str());
-    return;
-  }
-  if (1 == sscanf(arg, "vignette=%s", buf)) {
-    vignetteFile = buf;
-    printf("loading vignette from %s!\n", vignetteFile.c_str());
-    return;
-  }
-
-  if (1 == sscanf(arg, "gamma=%s", buf)) {
-    gammaFile = buf;
-    printf("loading gammaCalib from %s!\n", gammaFile.c_str());
-    return;
-  }
-
-  if (1 == sscanf(arg, "right_calib=%s", buf)) {
-    right_calib = buf;
-    printf("loading calibration from %s!\n", right_calib.c_str());
-    return;
-  }
-  if (1 == sscanf(arg, "right_vignette=%s", buf)) {
-    right_vignetteFile = buf;
-    printf("loading vignette from %s!\n", right_vignetteFile.c_str());
-    return;
-  }
-
-  if (1 == sscanf(arg, "right_gamma=%s", buf)) {
-    right_gammaFile = buf;
-    printf("loading gammaCalib from %s!\n", right_gammaFile.c_str());
     return;
   }
 
@@ -410,6 +377,7 @@ int main(int argc, char **argv) {
   nh.getParam("imagetopic_krgb", imagetopic_kinectRGB);
   nh.getParam("imagetopic_d", imagetopic_kinectD);
   nh.getParam("offset", offsetOptrisRGB);
+  nh.getParam("imuTopic", imutopic);
   nh.getParam("poseTopic1", poseTopic1);
   nh.getParam("poseTopic2", poseTopic2);
   std::cout << "offset between tis and optris: " << offsetOptrisRGB
@@ -418,6 +386,7 @@ int main(int argc, char **argv) {
   ros::Subscriber flagStateSub = nh.subscribe("/optris/flag_state", 1, &flagCb);
   ros::Subscriber gtSub = nh.subscribe("/fix", 1, &gtCb);
   ros::Subscriber imgSub = nh.subscribe(imagetopic_L, 1, &monoVidCb);
+  ros::Subscriber imuSub = nh.subscribe(imutopic, 1, &imuCb);
   image_transport::ImageTransport it(nh);
   mImg_pub = it.advertise("/camera/image_raw2", 1);
   ros::Subscriber poseSub = nh.subscribe(poseTopic1, 10, &chatterCallback);
