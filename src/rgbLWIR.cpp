@@ -343,6 +343,21 @@ void chatterCallback3(const geometry_msgs::PoseStamped &msg) {
   fclose(fab);
 }
 
+void imuCb(const sensor_msgs::Imu &msg) {
+  double time = msg.header.stamp.toSec();
+
+  FILE *fab;
+  char buf[1000];
+  snprintf(buf, 1000, "%s/imu.txt", out_root.c_str());
+  fab = fopen(buf, "a");
+
+  fprintf(fab, "%lf, %lf, %lf, %lf, %lf, %lf, %lf\n", time, msg.angular_velocity.x,
+          msg.angular_velocity.y, msg.angular_velocity.z, msg.linear_acceleration.x,
+          msg.linear_acceleration.y, msg.linear_acceleration.z);
+  fclose(fab);
+}
+
+
 int main(int argc, char **argv) {
   ros::init(argc, argv, "dso_live");
 
@@ -363,7 +378,7 @@ int main(int argc, char **argv) {
 
   ros::NodeHandle nh("~");
   std::string imagetopic_L, imagetopic_R, imagetopic_kinectRGB,
-      imagetopic_kinectD;
+      imagetopic_kinectD, imutopic;
   std::string poseTopic1, poseTopic2, poseTopic3;
   nh.getParam("imagetopic_l", imagetopic_L);
   nh.getParam("imagetopic_r", imagetopic_R);
