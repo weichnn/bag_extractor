@@ -23,11 +23,11 @@ catkin_ws
 ### extract synced RGB+LWIR+Depth data
 
 ```
-roslaunch msdi_ros extract_msdi_rld_dataset.launch
+roslaunch msdi_ros extract_msdi_rld.launch
 ```
 
 ### extract synced RGB+LWIR data
 
 ```
-roslaunch msdi_ros extract_msdi_rl_dataset.launch
+roslaunch msdi_ros extract_msdi_rl.launch
 ```
