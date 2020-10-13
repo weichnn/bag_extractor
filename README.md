@@ -9,10 +9,10 @@ catkin_ws
 
 ```
  mkdir -p ~/catkin_ws/src
+ cd ~/catkin_ws/src
+ git clone git@github.com:weichnn/bag_extractor.git
  cd ~/catkin_ws/
  catkin_make
- cd src
- git clone git@github.com:weichnn/bag_extractor.git
 
 ```
 
