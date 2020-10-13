@@ -9,6 +9,7 @@
 #include <sensor_msgs/CameraInfo.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/NavSatFix.h>
+#include <sensor_msgs/Imu.h>
 #include <sensor_msgs/image_encodings.h>
 #include <signal.h>
 #include <stdio.h>
@@ -256,6 +257,21 @@ void chatterCallback3(const geometry_msgs::PoseStamped &msg) {
   fclose(fab);
 }
 
+void imuCb(const sensor_msgs::Imu &msg) {
+  double time = msg.header.stamp.toSec();
+
+  FILE *fab;
+  char buf[1000];
+  snprintf(buf, 1000, "%s/imu.txt", out_root.c_str());
+  fab = fopen(buf, "a");
+
+  fprintf(fab, "%lf, %lf, %lf, %lf, %lf, %lf, %lf\n", time,
+          msg.angular_velocity.x, msg.angular_velocity.y,
+          msg.angular_velocity.z, msg.linear_acceleration.x,
+          msg.linear_acceleration.y, msg.linear_acceleration.z);
+  fclose(fab);
+}
+
 int main(int argc, char **argv) {
   ros::init(argc, argv, "msdi_ros_live");
 
@@ -276,13 +292,14 @@ int main(int argc, char **argv) {
 
   ros::NodeHandle nh("~");
   std::string imagetopic_L, imagetopic_R, imagetopic_kinectRGB,
-      imagetopic_kinectD;
+      imagetopic_kinectD, imutopic;
   std::string poseTopic1, poseTopic2, poseTopic3;
   nh.getParam("imagetopic_l", imagetopic_L);
   nh.getParam("imagetopic_r", imagetopic_R);
   nh.getParam("imagetopic_krgb", imagetopic_kinectRGB);
   nh.getParam("imagetopic_d", imagetopic_kinectD);
   nh.getParam("offset", offsetOptrisRGB);
+  nh.getParam("imuTopic", imutopic);
   nh.getParam("poseTopic1", poseTopic1);
   nh.getParam("poseTopic2", poseTopic2);
   std::cout << "offset between tis and optris: " << offsetOptrisRGB
@@ -292,6 +309,7 @@ int main(int argc, char **argv) {
   ros::Subscriber imgSub = nh.subscribe(imagetopic_L, 1, &monoVidCb);
   image_transport::ImageTransport it(nh);
   mImg_pub = it.advertise("/camera/image_raw2", 1);
+  ros::Subscriber imuSub = nh.subscribe(imutopic, 1, &imuCb);
   ros::Subscriber poseSub = nh.subscribe(poseTopic1, 10, &chatterCallback);
   ros::Subscriber poseSub2 = nh.subscribe(poseTopic2, 10, &chatterCallback2);
   message_filters::Subscriber<sensor_msgs::Image> left_sub(

@@ -96,95 +96,6 @@ void flagCb(const dso_ros::Flag flag) {
   printf("%d\n", flag.flag_state);
 }
 
-void llh2xyz(double llh[3], double xyz[3])  //Î³¾­¸ß ×ª µØÐÄµØÇò×ø±êÏµ
-{
-  double phi = llh[0] * M_PI / 180.0f;
-  double lambda = llh[1] * M_PI / 180.0f;
-  double h = llh[2];
-
-  double a = 6378137.0000f;  // earth semimajor axis in meters
-  double b = 6356752.3142f;  // earth semiminor axis in meters
-  double e = sqrt(1.0f - (b / a) * (b / a));
-
-  double sinphi = sin(phi);
-  double cosphi = cos(phi);
-  double coslam = cos(lambda);
-  double sinlam = sin(lambda);
-  double tan2phi = (tan(phi)) * (tan(phi));
-  double tmp = 1.0f - e * e;
-  double tmpden = sqrt(1.0f + tmp * tan2phi);
-
-  double x = (a * coslam) / tmpden + h * coslam * cosphi;
-
-  double y = (a * sinlam) / tmpden + h * sinlam * cosphi;
-
-  double tmp2 = sqrt(1.0f - e * e * sinphi * sinphi);
-  double z = (a * tmp * sinphi) / tmp2 + h * sinphi;
-
-  xyz[0] = x;
-  xyz[1] = y;
-  xyz[2] = z;
-}
-
-void xyz2enu(double xyz[3], double orgllh[3],
-             double enu[3])  //µØÐÄµØÇò×ø±êÏµ ×ª ¶«±±ÌìµØÀí×ø±êÏµ
-{
-  double tmpxyz[3];
-  double tmporg[3];
-  double difxyz[3];
-  // double orgllh[3];
-  double orgxyz[3];
-  double phi, lam, sinphi, cosphi, sinlam, coslam;
-
-  llh2xyz(orgllh, orgxyz);
-
-  int i;
-  for (i = 0; i < 3; i++) {
-    tmpxyz[i] = xyz[i];
-    tmporg[i] = orgxyz[i];
-    difxyz[i] = tmpxyz[i] - tmporg[i];
-  }
-
-  // xyz2llh(orgxyz,orgllh);
-
-  phi = orgllh[0] * M_PI / 180.0f;
-  lam = orgllh[1] * M_PI / 180.0f;
-  sinphi = sin(phi);
-  cosphi = cos(phi);
-  sinlam = sin(lam);
-  coslam = cos(lam);
-  double R[3][3] = {{-sinlam, coslam, 0.0f},
-                    {-sinphi * coslam, -sinphi * sinlam, cosphi},
-                    {cosphi * coslam, cosphi * sinlam, sinphi}};
-
-  enu[0] = 0;
-  enu[1] = 0;
-  enu[2] = 0;
-  for (i = 0; i < 3; i++) {
-    enu[0] = enu[0] + R[0][i] * difxyz[i];
-    enu[1] = enu[1] + R[1][i] * difxyz[i];
-    enu[2] = enu[2] + R[2][i] * difxyz[i];
-  }
-}
-
-void gtCb(const sensor_msgs::NavSatFix nvdata) {
-  FILE *f;
-  char buf3[1000];
-  snprintf(buf3, 1000, "%s/gt.txt", out_root.c_str());
-  f = fopen(buf3, "a");
-
-  double orgllh[3] = {(30.263254f), (120.115654f), 33.196903};
-  double llh[3] = {(nvdata.latitude), (nvdata.longitude), nvdata.altitude};
-  double xyz[3];
-  llh2xyz(llh, xyz);
-  double enu[3];
-  llh2xyz(llh, xyz);
-  xyz2enu(xyz, orgllh, enu);
-  fprintf(f, "%lf %lf %lf %lf\n", nvdata.header.stamp.toSec(), enu[0], enu[1],
-          enu[2]);
-  fclose(f);
-}
-
 void vidCb(const sensor_msgs::ImageConstPtr img,
            const sensor_msgs::ImageConstPtr imgRight) {
   //	color
@@ -370,7 +281,6 @@ int main(int argc, char **argv) {
             << std::endl;
 
   ros::Subscriber flagStateSub = nh.subscribe("/optris/flag_state", 1, &flagCb);
-  ros::Subscriber gtSub = nh.subscribe("/fix", 1, &gtCb);
   ros::Subscriber imgSub = nh.subscribe(imagetopic_L, 1, &monoVidCb);
   ros::Subscriber imuSub = nh.subscribe(imutopic, 1, &imuCb);
   image_transport::ImageTransport it(nh);
