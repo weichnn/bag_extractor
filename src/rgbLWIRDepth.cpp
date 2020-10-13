@@ -66,7 +66,14 @@ void CreateFolder(const std::string &path) {
   }
 }
 
-int frameID = 0;
+cv::Mat img_rot180(const cv::Mat &img) {
+  cv::Point2f src_center(img.cols / 2.0F, img.rows / 2.0F);
+  cv::Mat rot_mat = getRotationMatrix2D(src_center, 180, 1.0);
+  cv::Mat dst;
+  cv::warpAffine(img, dst, rot_mat, img.size());
+
+  return dst;
+}
 
 cv::Mat im_rotate_crop(const cv::Mat &img, const cv::Rect &rect) {
   cv::Point2f src_center(img.cols / 2.0F, img.rows / 2.0F);
@@ -124,6 +131,7 @@ void mssensorCb(const sensor_msgs::ImageConstPtr img,
   assert(kinect_depth_cv_ptr->image.channels() == 1);
   // kinect_depth_cv_ptr->image = im_rotate_crop(kinect_depth_cv_ptr->image,
   // rect);
+  kinect_depth_cv_ptr->image = img_rot180(kinect_depth_cv_ptr->image);
 
   //	process optris
   cv::Mat m;
