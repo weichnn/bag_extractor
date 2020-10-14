@@ -26,7 +26,7 @@
 #include "msdi_ros/Flag.h"
 
 std::string out_root = "./data";
-std::tuple<std::string, std::string, std::string, std::string, std::string>
+std::tuple<std::string, std::string, std::string, std::string, std::string, std::string>
     outPaths;
 
 bool useSampleOutput = false;
@@ -119,8 +119,9 @@ void mssensorCb(const sensor_msgs::ImageConstPtr img,
   //	optris
   cv_bridge::CvImagePtr right_cv_ptr =
       cv_bridge::toCvCopy(imgRight, sensor_msgs::image_encodings::MONO16);
-  assert(right_cv_ptr->image.type() == CV_16U);
-  assert(right_cv_ptr->image.channels() == 1);
+  cv::Mat lwir_image = right_cv_ptr->image.clone();
+  assert(lwir_image.type() == CV_16UC1);
+  assert(lwir_image.channels() == 1);
 
   //	kinect
   cv::Rect rect(160, 30, 640, 480);
@@ -136,11 +137,11 @@ void mssensorCb(const sensor_msgs::ImageConstPtr img,
   //	process optris
   cv::Mat m;
   cv::Mat v;
-  cv::meanStdDev(right_cv_ptr->image, m, v);
-  double maxinm;
-  double mininm;
-  cv::minMaxIdx(right_cv_ptr->image, &maxinm, &mininm);
-  std::cout << "optris mean, std, max, min" << m << "\t" << v << "\t" << maxinm
+  cv::meanStdDev(lwir_image, m, v);
+  double maxinm = 0.0;
+  double mininm = 0.0;
+  cv::minMaxIdx(lwir_image, &mininm, &maxinm);
+  std::cout << "optris mean, std, max, min:" << m << "\t" << v << "\t" << maxinm
             << "\t" << mininm << std::endl;
 
   // cv::Mat min = m - 3.0f * v;
@@ -149,20 +150,19 @@ void mssensorCb(const sensor_msgs::ImageConstPtr img,
   double min = mininm;
   double max = maxinm;
 
-  double alpha = (255.0f) / (maxinm - mininm);
+  double alpha = (255.0f) / (max - min);
 
-  for (int i = 0; i < (right_cv_ptr->image).rows; ++i) {
-    for (int j = 0; j < (right_cv_ptr->image).cols; ++j) {
+  for (int i = 0; i < (lwir_image).rows; ++i) {
+    for (int j = 0; j < (lwir_image).cols; ++j) {
       double x =
-          (double)(right_cv_ptr->image.at<ushort>(i, j)) - min;
+          (double)(lwir_image.at<ushort>(i, j)) - min;
       if (x < 0.0f) {
-        right_cv_ptr->image.at<ushort>(i, j) = 0;
+        lwir_image.at<ushort>(i, j) = 0;
       } else {
         if (x > max) {
-          right_cv_ptr->image.at<ushort>(i, j) = 255;
+          lwir_image.at<ushort>(i, j) = 255;
         } else {
-          right_cv_ptr->image.at<ushort>(i, j) = alpha * x;
-          // printf("%d\n", right_cv_ptr->image.at<ushort>(i,j));
+          lwir_image.at<ushort>(i, j) = (ushort)alpha * x;
         }
       }
     }
@@ -170,7 +170,7 @@ void mssensorCb(const sensor_msgs::ImageConstPtr img,
 
   double time = cv_ptr->header.stamp.toSec();
   double right_time = right_cv_ptr->header.stamp.toSec();
-  right_cv_ptr->image.convertTo(right_cv_ptr->image, CV_8U);
+  lwir_image.convertTo(lwir_image, CV_8UC1);
 
   printf("%f\n", time - right_time);
 
@@ -190,7 +190,12 @@ void mssensorCb(const sensor_msgs::ImageConstPtr img,
   char bufoptris[1000];
   snprintf(bufoptris, 1000, "%s/%lf.png", std::get<2>(outPaths).c_str(),
            cv_ptr->header.stamp.toSec());
-  imwrite(bufoptris, right_cv_ptr->image);
+  imwrite(bufoptris, lwir_image);
+
+  char bufoptris_raw[1000];
+  snprintf(bufoptris_raw, 1000, "%s/%lf.png", std::get<5>(outPaths).c_str(),
+           cv_ptr->header.stamp.toSec());
+  imwrite(bufoptris_raw, right_cv_ptr->image);
 
   char bufkd[1000];
   snprintf(bufkd, 1000, "%s/%lf.png", std::get<4>(outPaths).c_str(),
@@ -289,7 +294,7 @@ int main(int argc, char **argv) {
 
   outPaths = std::make_tuple(out_root + "left/", out_root + "leftRGB/",
                              out_root + "right/", out_root + "kinectRGB/",
-                             out_root + "kinectDepth/");
+                             out_root + "kinectDepth/", out_root + "LWIR_raw/");
   std::cout << "save in " << out_root << std::endl;
   std::cout << "save rgb in " << std::get<0>(outPaths) << std::endl;
   CreateFolder(std::get<0>(outPaths));
@@ -297,6 +302,7 @@ int main(int argc, char **argv) {
   CreateFolder(std::get<2>(outPaths));
   CreateFolder(std::get<3>(outPaths));
   CreateFolder(std::get<4>(outPaths));
+  CreateFolder(std::get<5>(outPaths));
 
   ros::NodeHandle nh("~");
   std::string imagetopic_L, imagetopic_R, imagetopic_kinectRGB,

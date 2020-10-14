@@ -114,7 +114,7 @@ void vidCb(const sensor_msgs::ImageConstPtr img,
   cv::meanStdDev(right_cv_ptr->image, m, v);
   double maxinm;
   double mininm;
-  cv::minMaxIdx(right_cv_ptr->image, &maxinm, &mininm);
+  cv::minMaxIdx(right_cv_ptr->image, &mininm, &maxinm);
   std::cout << m << "\t" << v << "\t" << maxinm << "\t" << mininm << std::endl;
 
   // cv::Mat min = m-3.0f*v;
