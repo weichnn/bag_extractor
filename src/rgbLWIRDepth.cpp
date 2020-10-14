@@ -131,7 +131,7 @@ void mssensorCb(const sensor_msgs::ImageConstPtr img,
   assert(kinect_depth_cv_ptr->image.channels() == 1);
   // kinect_depth_cv_ptr->image = im_rotate_crop(kinect_depth_cv_ptr->image,
   // rect);
-  kinect_depth_cv_ptr->image = img_rot180(kinect_depth_cv_ptr->image);
+  cv::Mat depth_image = img_rot180(kinect_depth_cv_ptr->image).clone();
 
   //	process optris
   cv::Mat m;
@@ -195,7 +195,7 @@ void mssensorCb(const sensor_msgs::ImageConstPtr img,
   char bufkd[1000];
   snprintf(bufkd, 1000, "%s/%lf.png", std::get<4>(outPaths).c_str(),
            cv_ptr->header.stamp.toSec());
-  imwrite(bufkd, kinect_depth_cv_ptr->image);
+  imwrite(bufkd, depth_image);
 
   FILE *f;
   char buf3[1000];
