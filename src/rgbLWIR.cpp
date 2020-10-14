@@ -21,7 +21,7 @@
 #include <tuple>
 
 #include "cv_bridge/cv_bridge.h"
-#include "dso_ros/Flag.h"
+#include "msdi_ros/Flag.h"
 #include "geometry_msgs/Pose.h"
 #include "math.h"
 
@@ -91,7 +91,7 @@ void monoVidCb(const sensor_msgs::ImageConstPtr img) {
   mImg_pub.publish(copiedImg);
 }
 
-void flagCb(const dso_ros::Flag flag) {
+void flagCb(const msdi_ros::Flag flag) {
   flag_state_now = flag.flag_state;
   printf("%d\n", flag.flag_state);
 }
@@ -248,7 +248,7 @@ void imuCb(const sensor_msgs::Imu &msg) {
 }
 
 int main(int argc, char **argv) {
-  ros::init(argc, argv, "dso_live");
+  ros::init(argc, argv, "msdi_ros_live");
 
   for (int i = 1; i < argc; i++) parseArgument(argv[i]);
 
