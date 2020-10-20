@@ -37,7 +37,7 @@ enum TFlagState {
 
 std::string out_root = "./data";
 std::tuple<std::string, std::string, std::string, std::string, std::string,
-           std::string>
+           std::string, std::string>
     outPaths;
 
 bool useSampleOutput = false;
@@ -81,7 +81,7 @@ void constructFolder() {
   outPaths =
       std::make_tuple(out_root + "gray/", out_root + "color/",
                       out_root + "thermal/", out_root + "kinectRGB/",
-                      out_root + "kinectDepth/", out_root + "thermalRaw/");
+                      out_root + "kinectDepth/", out_root + "thermalRaw/", out_root + "kinectDepthRotRaw/");
   std::cout << "save in " << out_root << std::endl;
   std::cout << "save rgb in " << std::get<0>(outPaths) << std::endl;
   CreateFolder(std::get<0>(outPaths));
@@ -90,6 +90,7 @@ void constructFolder() {
   CreateFolder(std::get<3>(outPaths));
   CreateFolder(std::get<4>(outPaths));
   CreateFolder(std::get<5>(outPaths));
+  CreateFolder(std::get<6>(outPaths));
 }
 
 cv::Mat img_rot180(const cv::Mat &img) {
@@ -248,7 +249,7 @@ void mssensorCb(const sensor_msgs::ImageConstPtr img,
   assert(kinect_depth_cv_ptr->image.type() == CV_16UC1);
   assert(kinect_depth_cv_ptr->image.channels() == 1);
   cv::Mat depth_image = im_rotate_crop(kinect_depth_cv_ptr->image, rect);
-  // cv::Mat depth_image = img_rot180(kinect_depth_cv_ptr->image).clone();
+  cv::Mat depth_image_rotated = img_rot180(kinect_depth_cv_ptr->image).clone();
 
   //	process optris
   cv::Mat m;
@@ -316,6 +317,11 @@ void mssensorCb(const sensor_msgs::ImageConstPtr img,
   snprintf(bufkd, 1000, "%s/%lf.png", std::get<4>(outPaths).c_str(),
            cv_ptr->header.stamp.toSec());
   imwrite(bufkd, depth_image);
+
+  char bufkdr[1000];
+  snprintf(bufkdr, 1000, "%s/%lf.png", std::get<6>(outPaths).c_str(),
+           cv_ptr->header.stamp.toSec());
+  imwrite(bufkdr, depth_image_rotated);
 
   FILE *f;
   char buf3[1000];
