@@ -7,7 +7,7 @@ This is meant as simple, minimal example of how to process multi-spectal dataset
 
 catkin_ws
 
-```
+``` shell
  mkdir -p ~/catkin_ws/src
  cd ~/catkin_ws/src
  git clone git@github.com:weichnn/bag_extractor.git
@@ -22,12 +22,12 @@ catkin_ws
 
 ### extract synced RGB+LWIR+Depth data
 
-```
+``` shell
 roslaunch msdi_ros extract_msdi_rld.launch
 ```
 
 ### extract synced RGB+LWIR data
 
-```
+``` shell
 roslaunch msdi_ros extract_msdi_rl.launch
 ```

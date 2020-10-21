@@ -30,3 +30,7 @@
 
 # vscode
 .vscode/
+
+
+rgbdUtils/cppUtils/build
+build
