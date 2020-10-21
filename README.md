@@ -1,7 +1,7 @@
 
 # ROS Wrapper around MSDI: Multi-spectral dataset
 
-This is meant as simple, minimal example of how to process multi-spectal dataset.
+This is meant as simple, minimal example of how to process multi-spectal dataset and how to generate dense depth images.
 
 # 1. Installation
 
