@@ -15,9 +15,6 @@ find_package(OpenCV REQUIRED)
 message("\n\n---- FOUND OpenCV Headers at\n\"${OpenCV_INCLUDE_DIRS}\"")
 message("---- FOUND OpenCV Libs at\n\"${OpenCV_LIBS}\"")
 
-find_package(Eigen3 REQUIRED)
-find_package(Boost COMPONENTS system thread)
-
 add_message_files(
   FILES
   Flag.msg
@@ -49,7 +46,6 @@ set(CMAKE_CXX_FLAGS
 
 include_directories(
   ${PROJECT_SOURCE_DIR}/src
-  ${EIGEN3_INCLUDE_DIR}
   ${catkin_INCLUDE_DIRS}
 )
 

@@ -1,21 +1,20 @@
 
 # RGBD Utils
 
-# Usage
+## Prerequisites
 
-## install cpp utils
+### install cpp utils
 
 ``` shell
 ./install.sh
-
 ```
 
-## install matlab in linux
+### install matlab in linux
 
-........
+Get MATLAB for linux in <https://www.mathworks.com/products/matlab.html>
 
 ## inpainting
 
 ``` shell
-./generateRGBD.sh cpp_build_path python_path matlab_path calib_file data_root_path inpaint[yes/no]?
+./generateDepth.sh cpp_build_path python_path matlab_path calib_file data_root_path inpaint[yes/no]?
 ```
