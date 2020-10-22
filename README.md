@@ -41,6 +41,7 @@ catkin_ws
  ./build.sh
  cd ~/catkin_ws/
  catkin_make
+ source devel/setup.bash 
 ```
 
 ## 3 Usage
@@ -68,9 +69,7 @@ roslaunch msdi_ros extract_msdi_rl.launch
 e.g.,
 
 ``` shell
-./processBags.sh /media/ubuntu/HDDData/multi-spectral-dataset/
- /media/ubuntu/nvmeData/multi-spectral-dataset/
- extract_msdi_rl.launch
+./processBags.sh /media/ubuntu/HDDData/multi-spectral-dataset/ /media/ubuntu/nvmeData/multi-spectral-dataset/ extract_msdi_rl.launch
 ```
 
 
