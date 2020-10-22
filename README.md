@@ -1,3 +1,5 @@
+<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML"></script>
 
 # ROS Wrapper for Multi-spectral Dataset
 
@@ -71,5 +73,75 @@ e.g.,
 ``` shell
 ./processBags.sh /media/ubuntu/HDDData/multi-spectral-dataset/ /media/ubuntu/nvmeData/multi-spectral-dataset/ extract_msdi_rl.launch
 ```
+
+## Output Folder Directory
+
+- **./times.txt**
+    - Each line in the text file contains a single index timestamp for synced images.
+    - timestamp (float) gives the number of seconds since the Unix epoch.
+- **./color/*.png**
+    - These color images are stored as 640x480 8-bit RGB images in PNG format.
+- **./colorUndist/*.png**
+    - These color images are stored as 640x480 8-bit RGB images in PNG format.
+- **./gray/*.png**
+    - These gray images, converted from color images, are stored as 640x480 8-bit monochrome images in PNG format.
+- **./thermalRaw/*.png**
+    - These thermal images are stored as 640x480 16-bit monochrome images in PNG format.
+    - In order to get temperature (Celsius) values in floating point format, the following conversion needs to be applied for each pixel:
+
+``` c++
+        float t = (float)data[i] / 10.f - 100.f;
+```
+
+- **./thermal/*.png**
+    - These thermal images are stored as 640x480 8-bit monochrome images in PNG format.
+    - The thermal images can be transformed into thermal raw by the affine parameters, shown in ab.txt, using the function: 
+
+``` latex
+        \\( I_{thermal} = e^{-a} (I_{thermal_raw} − b) \\)
+```
+
+- **./ab.txt**
+    - Each line in the text file contains a single affine transfer parameters.
+    - The format of each line is 'timestamp a b'
+- **./flag.txt**
+    - Each line in the text file contains a single flag states.
+    - The format of each line is 'timestamp flag_state'
+    - the flag_state is defined as:
+
+``` c++
+        enum TFlagState {
+            fsFlagOpen,
+            fsFlagClose,
+            fsFlagOpening,
+            fsFlagClosing,
+            fsError
+        };
+```
+
+- **./depth/*.png**
+    - These depth images are stored as 640x480 16-bit monochrome images in PNG format.
+    - These depth images are scaled by a factor of 1000, i.e., a pixel value of 1000 in the depth image corresponds to a distance of 1 meter from the camera, 10000 to 10 meter distance, etc. A pixel value of 0 means missing value/no data.
+- **./depthProj/*.png**
+    - These depth images are stored as 640x480 16-bit monochrome images in PNG format.
+    - These depth images are scaled by a factor of 1000. A pixel value of 0 means missing value/no data.
+- **./rgbdOver/*.png**
+    - These color images are stored as 640x480 8-bit RGB images in PNG format.
+    - Each image visualizes RGB and Depth alignment.
+- **./kinectRGB/*.png**
+    - These color images are stored as 960x540 8-bit RGB images in PNG format.
+- **./kinectDepth/*.png**
+    - These color images are stored as 960x540 16-bit monochrome images in PNG format.
+    - These depth images are scaled by a factor of 1000. A pixel value of 0 means missing value/no data.
+- **./kinectDepthCrop/*.png**
+    - These depth images are stored as 640x480 16-bit monochrome images in PNG format.
+    - These depth images are scaled by a factor of 1000. A pixel value of 0 means missing value/no data.
+- **./groundtruth.txt**
+    - Each line in the text file contains a single pose.
+    - The format of each line is 'timestamp tx ty tz qx qy qz qw'
+    - tx ty tz (3 floats) give the position of the optical center of the color camera with respect to the world origin as defined by the motion capture system.
+    - qx qy qz qw (4 floats) give the orientation of the optical center of the color camera in form of a unit quaternion with respect to the world origin as defined by the motion capture system.
+
+
 
 
