@@ -5,6 +5,7 @@ dir_folder=$(dirname $0)
 data_root=$(realpath $1)
 output_root=$(realpath $2)
 launchfile_name=$3
+calib_file=${dir_folder}/rgbdUtils/calibfiles/extris_RGB2Kinect.yml
 
 if [ $# != 3 ]; then
   echo "False Usage!"
@@ -25,7 +26,7 @@ for filename in ${data_root}/*.bag ; do
         fi
     fi
     if [ ! -d "$output_root/$name/depth" ]; then
-        ${dir_folder}/rgbdUtils/generateDepth.sh ${dir_folder}/rgbdUtils/cppUtils/build/ ${dir_folder}/rgbdUtils/pyUtils/ ${dir_folder}/rgbdUtils/matlabUtils/toolbox_nyu_depth_v2/ ${dir_folder}/rgbdUtils/calibfiles/extris_RGB2Kinect.yml $output_root/$name $impaintDepth
+        ${dir_folder}/rgbdUtils/generateDepth.sh ${dir_folder}/rgbdUtils/cppUtils/build/ ${dir_folder}/rgbdUtils/pyUtils/ ${dir_folder}/rgbdUtils/matlabUtils/toolbox_nyu_depth_v2/ $calib_file $output_root/$name $impaintDepth
     fi
 done
 

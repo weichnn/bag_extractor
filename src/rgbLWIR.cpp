@@ -34,6 +34,11 @@ int main(int argc, char **argv) {
   ros::Subscriber poseSub = nh.subscribe(poseTopic1, 10, &chatterCallback);
   ros::Subscriber poseSub2 = nh.subscribe(poseTopic2, 10, &chatterCallback2);
 
+  ros::Subscriber kinect_color_raw_sub =
+      nh.subscribe(imagetopic_kinectRGB, 3, &kinectRGBCb);
+  ros::Subscriber kinect_depth_raw_sub =
+      nh.subscribe(imagetopic_kinectD, 3, &kinectDepthCb);
+
   message_filters::Subscriber<sensor_msgs::Image> left_sub(
       nh, "/camera/image_raw2", 10);
   message_filters::Subscriber<sensor_msgs::Image> right_sub(nh, imagetopic_R,

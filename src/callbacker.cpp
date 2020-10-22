@@ -391,6 +391,32 @@ void chatterCallback3(const geometry_msgs::PoseStamped &msg) {
   fclose(fab);
 }
 
+void kinectDepthCb(const sensor_msgs::ImageConstPtr img) {
+  //	kinect depth
+  cv_bridge::CvImagePtr kinect_depth_cv_ptr =
+      cv_bridge::toCvCopy(img, sensor_msgs::image_encodings::TYPE_16UC1);
+  assert(kinect_depth_cv_ptr->image.type() == CV_16UC1);
+  assert(kinect_depth_cv_ptr->image.channels() == 1);
+  cv::Mat image_rot = img_rot180(kinect_depth_cv_ptr->image).clone();
+  char bufkd[1000];
+  snprintf(bufkd, 1000, "%s/%lf.png", std::get<4>(outPaths).c_str(),
+           kinect_depth_cv_ptr->header.stamp.toSec());
+  imwrite(bufkd, image_rot);
+}
+
+void kinectRGBCb(const sensor_msgs::ImageConstPtr img) {
+  //	kinect rgb
+  cv_bridge::CvImagePtr kinect_color_cv_ptr =
+      cv_bridge::toCvCopy(img, sensor_msgs::image_encodings::BGR8);
+  assert(kinect_color_cv_ptr->image.type() == CV_8UC3);
+  assert(kinect_color_cv_ptr->image.channels() == 3);
+  cv::Mat image_rot = img_rot180(kinect_color_cv_ptr->image).clone();
+  char bufkrgb[1000];
+  snprintf(bufkrgb, 1000, "%s/%lf.png", std::get<3>(outPaths).c_str(),
+           kinect_color_cv_ptr->header.stamp.toSec());
+  imwrite(bufkrgb, image_rot);
+}
+
 void imuCb(const sensor_msgs::Imu &msg) {
   double time = msg.header.stamp.toSec();
 

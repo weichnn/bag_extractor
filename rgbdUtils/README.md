@@ -5,7 +5,7 @@
 
 ## install cpp utils
 
-```
+``` shell
 ./install.sh
 
 ```
@@ -16,6 +16,6 @@
 
 ## inpainting
 
-```
+``` shell
 ./generateRGBD.sh cpp_build_path python_path matlab_path calib_file data_root_path inpaint[yes/no]?
 ```
