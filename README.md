@@ -1,6 +1,3 @@
-<script type="text/javascript"
-        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_CHTML"></script>
-
 # ROS Wrapper for Multi-spectral Dataset
 
 This is meant as simple, minimal example of how to process [multi-spectal dataset](https://github.com/NGCLAB/multi-spectral-dataset) and how to generate dense depth images.
@@ -95,15 +92,15 @@ e.g.,
 
 - **./thermal/*.png**
     - These thermal images are stored as 640x480 8-bit monochrome images in PNG format.
-    - The thermal images can be transformed into thermal raw by the affine parameters, shown in ab.txt, using the function: 
+    - The thermal images is obtain by transforming thermal raw using the affine parameters, shown in ab.txt, by the function:
 
 ``` latex
-        \\( I_{thermal} = e^{-a} (I_{thermal_raw} − b) \\)
+        I_{thermal} = e^{-a} (I_{thermal_raw} − b)
 ```
 
 - **./ab.txt**
-    - Each line in the text file contains a single affine transfer parameters.
-    - The format of each line is 'timestamp a b'
+    - Each line in the text file contains a single affine transfer parameter pair.
+    - The format of each line is 'timestamp a(float) b(float)'
 - **./flag.txt**
     - Each line in the text file contains a single flag states.
     - The format of each line is 'timestamp flag_state'
@@ -136,6 +133,15 @@ e.g.,
 - **./kinectDepthCrop/*.png**
     - These depth images are stored as 640x480 16-bit monochrome images in PNG format.
     - These depth images are scaled by a factor of 1000. A pixel value of 0 means missing value/no data.
+    - Each image is obtained by cropping the corresponding depth raw image in **./kinectDepth/** by the following code:
+
+``` c++
+        cv::Rect rect(160, 30, 640, 480);
+        cv::Mat ROI(depth_raw, rect);
+        cv::Mat croppedImage;
+        ROI.copyTo(croppedImage);
+```
+
 - **./groundtruth.txt**
     - Each line in the text file contains a single pose.
     - The format of each line is 'timestamp tx ty tz qx qy qz qw'
