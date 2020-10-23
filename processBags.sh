@@ -5,11 +5,11 @@ dir_folder=$(dirname $0)
 data_root=$(realpath $1)
 output_root=$(realpath $2)
 launchfile_name=$3
-calib_file=${dir_folder}/rgbdUtils/calibfiles/extris_RGB2Kinect.yml
+calib_file=$4
 
-if [ $# != 3 ]; then
+if [ $# != 4 ]; then
   echo "False Usage!"
-  echo " e.g.: $0 path_to_data_folder path_to_output_folder ros_launchfile_name"
+  echo " e.g.: $0 path_to_data_folder path_to_output_folder ros_launchfile_name calib_file"
   exit 1
 fi
 

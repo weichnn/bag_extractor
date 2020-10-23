@@ -47,22 +47,34 @@ catkin_ws
 
 ### 3.1 only extract data from rosbag
 
-- extract synced RGB+LWIR+Depth data
+1. run roslaunch
 
-``` shell
-roslaunch msdi_ros extract_msdi_rld.launch
-```
+    - extract synced RGB+LWIR+Depth data
 
-- extract synced RGB+LWIR data
+    ``` shell
+    roslaunch msdi_ros extract_msdi_rld.launch
+    ```
 
-``` shell
-roslaunch msdi_ros extract_msdi_rl.launch
-```
+    - extract synced RGB+LWIR data
+
+    ``` shell
+    roslaunch msdi_ros extract_msdi_rl.launch
+    ```
+
+2. rosbag play
+
+    ``` shell
+    rosbag play -r 0.2 sequence_name.bag
+    ```
+
 
 ### 3.2 extract and get dense depth images
 
+If you want to be able to extract data in batch, you can use this script. This script will look for .bag files in the specified folder (**path_to_data_folder**) and extract the data to the target folder(**path_to_output_folder**) via the ROS launch (**ros_launchfile_name**). The script will also launch the script program with the calibration file (**path_to_calibfile**) in "rgbdutils" folder to obtain the standard camera view's depth images. Since there are missing data for some pixels in the directly obtained depth map, there is an option to use the Matlab program to complete the hole filling and obtain dense depth images. 
+
+
 ``` shell
-./processBags.sh path_to_data_folder path_to_output_folder ros_launchfile_name
+./processBags.sh path_to_data_folder path_to_output_folder ros_launchfile_name path_to_calibfile 
 ```
 
 e.g.,
@@ -70,7 +82,8 @@ e.g.,
 ``` shell
 ./processBags.sh /media/ubuntu/HDDData/multi-spectral-dataset/ \ 
     /media/ubuntu/nvmeData/multi-spectral-dataset/ \ 
-    extract_msdi_rl.launch
+    extract_msdi_rl.launch \
+    rgbdUtils/calibfiles/extris_RGB2Kinect.yml
 ```
 
 ## Output Folder Directory
