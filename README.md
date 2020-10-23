@@ -1,4 +1,4 @@
-# ROS Wrapper for Multi-spectral Dataset
+# Utilities for Multi-spectral Dataset
 
 This is meant as simple, minimal example of how to process [multi-spectal dataset](https://github.com/NGCLAB/multi-spectral-dataset) and how to generate dense depth images.
 
