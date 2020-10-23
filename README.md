@@ -2,6 +2,8 @@
 
 This is meant as simple, minimal example of how to process [multi-spectal dataset](https://github.com/NGCLAB/multi-spectral-dataset) and how to generate dense depth images.
 
+The program consists of two parts, the ROS bag extraction program and the depth image processing program. The ROS bag extraction program is mainly responsible for extracting the BOS bag files' data and generating the corresponding data directory. The depth image processing program is used to obtain a complete dense depth image in the standard camera view using multiple view transformation and inpaint algorithms.
+
 ## 1. Prerequisites
 
 ### 1.1 ROS and Python
