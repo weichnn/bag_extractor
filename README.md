@@ -1,6 +1,6 @@
 # Utilities for Multi-spectral Dataset
 
-This is meant as simple, minimal example of how to process [multi-spectal dataset](https://github.com/NGCLAB/multi-spectral-dataset) and how to generate dense depth images.
+This is meant as simple, minimal example of how to process [multi-spectal dataset](https://github.com/NGCLAB/multi-spectral-dataset) and how to generate dense depth images in the standard camera's view.
 
 The repository consists of two parts, the ROS bag extraction program and the depth image processing program. The ROS bag extraction program is mainly responsible for extracting the BOS bag files' data and generating the corresponding data directory. The depth image processing program is used to obtain a complete dense depth image in the standard camera view using multiple view transformation and inpaint algorithms.
 
