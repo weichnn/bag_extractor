@@ -88,6 +88,12 @@ e.g.,
     rgbdUtils/calibfiles/extris_RGB2Kinect.yml
 ```
 
+#### The depth processing pipline is shown below 
+
+<div align="center">
+<img src="images/depth-pipline.png" width="600" />
+</div>
+
 ## Output Folder Directory
 
 - **./times.txt**
@@ -147,6 +153,7 @@ e.g.,
     - These rectified color images are stored as 960x540 8-bit RGB images in PNG format.
 - **./kinectDepth/*.png**
     - These rectified depth images are stored as 960x540 16-bit monochrome images in PNG format.
+    - The depth images have been converted to the standard camera view.
     - These depth images are scaled by a factor of 1000. A pixel value of 0 means missing value/no data.
 - **./kinectDepthCrop/*.png**
     - These rectified cropped depth images are stored as 640x480 16-bit monochrome images in PNG format.

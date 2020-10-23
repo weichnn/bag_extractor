@@ -13,7 +13,7 @@ if [ $# != 4 ]; then
   exit 1
 fi
 
-read -p "Do you want to impaint depth [yes/no]?: " impaintDepth
+read -p "Do you want to inpaint depth [yes/no]?: " inpaintDepth
 
 for filename in ${data_root}/*.bag ; do
     echo "processing ${filename}"
@@ -26,7 +26,7 @@ for filename in ${data_root}/*.bag ; do
         fi
     fi
     if [ ! -d "$output_root/$name/depth" ]; then
-        ${dir_folder}/rgbdUtils/generateDepth.sh ${dir_folder}/rgbdUtils/cppUtils/build/ ${dir_folder}/rgbdUtils/pyUtils/ ${dir_folder}/rgbdUtils/matlabUtils/toolbox_nyu_depth_v2/ $calib_file $output_root/$name $impaintDepth
+        ${dir_folder}/rgbdUtils/generateDepth.sh ${dir_folder}/rgbdUtils/cppUtils/build/ ${dir_folder}/rgbdUtils/pyUtils/ ${dir_folder}/rgbdUtils/matlabUtils/toolbox_nyu_depth_v2/ $calib_file $output_root/$name $inpaintDepth
     fi
 done
 
