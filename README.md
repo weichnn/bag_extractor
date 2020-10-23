@@ -148,8 +148,8 @@ e.g.,
 - **./groundtruth.txt**
     - Each line in the text file contains a single pose.
     - The format of each line is 'timestamp tx ty tz qx qy qz qw'
-    - tx ty tz (3 floats) give the position of the optical center of the color camera with respect to the world origin as defined by the motion capture system.
-    - qx qy qz qw (4 floats) give the orientation of the optical center of the color camera in form of a unit quaternion with respect to the world origin as defined by the motion capture system.
+    - tx ty tz (3 floats) give the position of the optical center of the standard camera with respect to the world origin as defined by the motion capture system.
+    - qx qy qz qw (4 floats) provide the orientation of the optical center of the standard camera in the form of a unit quaternion with respect to the world origin as defined by the motion capture system.
 
 
 
