@@ -96,7 +96,7 @@ e.g.,
 - **./color/*.png**
     - These color images are stored as 640x480 8-bit RGB images in PNG format.
 - **./colorUndist/*.png**
-    - These color images are stored as 640x480 8-bit RGB images in PNG format.
+    - These rectified color images are stored as 640x480 8-bit RGB images in PNG format.
 - **./gray/*.png**
     - These gray images, converted from color images, are stored as 640x480 8-bit monochrome images in PNG format.
 - **./thermalRaw/*.png**
@@ -134,22 +134,22 @@ e.g.,
 ```
 
 - **./depth/*.png**
-    - These depth images are stored as 640x480 16-bit monochrome images in PNG format.
+    - These rectified depth images are stored as 640x480 16-bit monochrome images in PNG format.
     - Each depth image is inpainted with the corresponding image.
     - These depth images are scaled by a factor of 1000, i.e., a pixel value of 1000 in the depth image corresponds to a distance of 1 meter from the camera, 10000 to 10 meter distance, etc. A pixel value of 0 means missing value/no data.
 - **./depthProj/*.png**
-    - These depth images are stored as 640x480 16-bit monochrome images in PNG format.
+    - These rectified depth images are stored as 640x480 16-bit monochrome images in PNG format.
     - These depth images are scaled by a factor of 1000. A pixel value of 0 means missing value/no data.
 - **./rgbdOver/*.png**
     - These color images are stored as 640x480 8-bit RGB images in PNG format.
     - Each image visualizes RGB and Depth alignment.
 - **./kinectRGB/*.png**
-    - These color images are stored as 960x540 8-bit RGB images in PNG format.
+    - These rectified color images are stored as 960x540 8-bit RGB images in PNG format.
 - **./kinectDepth/*.png**
-    - These color images are stored as 960x540 16-bit monochrome images in PNG format.
+    - These rectified depth images are stored as 960x540 16-bit monochrome images in PNG format.
     - These depth images are scaled by a factor of 1000. A pixel value of 0 means missing value/no data.
 - **./kinectDepthCrop/*.png**
-    - These depth images are stored as 640x480 16-bit monochrome images in PNG format.
+    - These rectified cropped depth images are stored as 640x480 16-bit monochrome images in PNG format.
     - These depth images are scaled by a factor of 1000. A pixel value of 0 means missing value/no data.
     - Each image is obtained by cropping the corresponding depth raw image in **./kinectDepth/** by the following code:
 
