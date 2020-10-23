@@ -76,7 +76,7 @@ e.g.,
 ## Output Folder Directory
 
 - **./times.txt**
-    - Each line in the text file contains a single index timestamp for synced images.
+    - Each line in the text file contains a single index timestamp for synced data.
     - timestamp (float) gives the number of seconds since the Unix epoch.
 - **./color/*.png**
     - These color images are stored as 640x480 8-bit RGB images in PNG format.
